@@ -1,0 +1,8 @@
+pandas==1.2.0
+pytz==2020.5
+numpy==1.19.4
+stockstats==0.3.2
+streamlit==0.73.1
+binance==0.3
+bokeh==2.2.3
+matplotlib==3.3.3
