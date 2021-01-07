@@ -26,8 +26,15 @@ from stockstats import StockDataFrame as Sdf
 
 st.title('Coin Trader')
 
-def color(x):
+def color_rsi(x):
     if x < 30:
+        color = 'red'
+    else:
+        color = 'white'
+    return 'background-color: %s' % color
+
+def color_wr(x):
+    if x >= 80:
         color = 'red'
     else:
         color = 'white'
@@ -48,6 +55,7 @@ class Controller:
             klines = np.array(klines)
         except Exception as e:
             st.text(e)
+            st.text(coin)
             print(e)
 
 
@@ -94,24 +102,57 @@ if __name__ == "__main__":
     controller = Controller()
 # Enter your api key and secret key here
     client = Client("","")
-    coin_list = ["TRXBNB","ETHBTC","TRXBTC","IOSTBTC","VENBTC","XRPBTC","LTCBTC"]
+    coin_list = ["BTCUSDT", "ETHUSDT"
+    ,"BTCBUSD","ETHBUSD","ETHBTC","LTCUSDT","BUSDUSDT","DOGEUSDT","XRPUSDT","BCCUSDT","BTCEUR",
+    "ADAUSDT","USDCUSDT","LINKUSDT","BNBUSDT","BTCUSDC","VENUSDT","LTCBTC","DOGEBTC","THETAUSDT","EOSUSDT","ETHUSDC","XRPBTC",
+    "ETHEUR","TRXUSDT","ZILUSDT","XLMUSDT","LINKBTC","ADABTC","BNBBTC","LTCBUSD","BNBBUSD","VENBTC","THETABTC","ETCUSDT","XMRUSDT",
+    "ZILBTC","ALGOUSDT","ATOMUSDT","NEBLBTC","NEOUSDT","WAVESUSDT","EOSBTC","XTZUSDT","ZECUSDT","DASHUSDT","XRPBUSD","XMRBTC",
+    "BANDUSDT","OMGUSDT","XEMBTC","BTCTUSD","TUSDUSDT","HOTUSDT","FUNUSDT","XLMBTC","BTCTRY","CHZUSDT","BTCNGN","ADABUSD","BTCPAX",
+    "BNBETH","XVGBTC","TRXBTC","TFUELUSDT","RENUSDT","LINKBUSD","EOSBUSD","ALGOBTC","ONTUSDT","SCBTC","BCHABCBUSD","XRPETH","WAVESBTC",
+    "PAXUSDT","ATOMBTC","TOMOUSDT","NANOUSDT","XTZBTC","LTCETH","BTTUSDT","STXUSDT","QTUMUSDT","IOTAUSDT","ETHPAX","ICXUSDT","FUNBTC",
+    "TFUELBTC","BATUSDT","NEOBTC","XRPEUR","ETCBTC","VENETH","DASHBTC","ETHTUSD","ZECBTC","MATICUSDT","SOLBTC","USDTTRY","ADAETH","BANDBTC",
+    "ZRXUSDT","LTCUSDC","VETBUSD","IOSTUSDT","CHZBTC","OMGBTC","ADXBTC","RENBTC","BNBEUR","TRXETH","ONEUSDT","THETAETH","FTTUSDT",
+    "KAVAUSDT","STXBTC","NANOBTC","ETHTRY","ARPAUSDT","LINKUSDC","LINKETH","SCETH","CVCUSDT","FTMUSDT","QTUMBTC","XMRETH","TOMOBTC"
+    ,"BTCRUB","RVNUSDT","BTSUSDT","BATBTC","GRSBTC","MDABTC","ZILETH","IOSTBTC","DCRBTC","LRCBTC","MATICBTC","PPTBTC",
+    "ENJUSDT","HOTETH","XRPUSDC","XVGETH","ICXBTC","BCHABCUSDC","ETCBUSD","MITHUSDT","XLMBUSD","LTCBNB","DREPUSDT","BNTUSDT","EOSETH"
+
+
+
+    # "HBARUSDT","ZRXBTC","ANKRBTC","XLMETH","NEBLETH","SOLBUSD","CVCBTC","ONEBTC","ZENBTC","XEMETH","ANKRUSDT","TRXBUSD","ONTBTC","BUSDTRY",
+    # "VENBNB","RLCUSDT","TRXXRP","TRXUSDC","XRPBNB","FTMBTC","ENJBTC","EOSUSDC","BUSDNGN","RVNBTC","ADAUSDC","LTOUSDT","BTSBTC","DREPBTC",
+    # "FUNETH","OAXBTC","USDTRUB","SCBNB","SNTBTC","SYSBTC","ADABNB","BNBUSDC","POLYBTC","KNCBTC","FETUSDT","XTZBUSD","OGNUSDT","CELRUSDT",
+    # "GTOUSDT","LTOBTC","LSKBTC","HBARBTC","DASHETH","BQXBTC","NXSBTC","WINUSDT","NANOBUSD","QKCBTC","WANUSDT","DOCKBTC",
+    # "FTTBTC","RLCBTC","MFTUSDT","BTTTRX","FETBTC","BNTBTC","TRXBNB","WAVESBUSD","OMGETH","KAVABTC","OSTBTC","CELRBTC","ARPABTC","ASTBTC",
+    # "REPBTC","ZECETH","PIVXBTC","NPXSUSDT","MANABTC","WANBTC","WABIBTC","ATOMBUSD","ENJETH","LSKUSDT","GVTBTC","HOTBNB","AGIBTC","ARDRBTC",
+    # "THETABNB","PERLUSDT","OGNBNB","LOOMBTC","BTGBTC","ZILBNB","NEOETH","NEOBUSD","STORJBTC","ARKBTC","BCDBTC","STXBNB","CTSIUSDT","BLZBTC",
+    # "NANOETH","DASHBUSD","WAVESETH","DLTBTC","DNTBTC","DOCKUSDT","ONGBTC","AIONUSDT","LTCTUSD","HOTBTC","OGNBTC","KEYUSDT","LRCETH","AIONBTC",
+    # "EOSBNB","WINTRX","ICXETH","DATABTC","SNGLSBTC","BRDBTC","ONGUSDT","BNBTRY","WRXUSDT","GTOBTC","PHBBTC","BNBTUSD","CTSIBTC",
+    # "XRPTUSD","SOLBNB","SKYBTC","MTLBTC","KMDBTC","TROYBTC","ALGOBNB","VIBBTC","YOYOBTC","XRPTRY","XZCBTC","POWRBTC","CTXCUSDT","ADXETH",
+    # "PERLBTC","KNCETH","MTLUSDT","GASBTC","AMBBTC","BEAMUSDT","BTTBNB","CHZBNB","STEEMBTC","ENJBNB","EOSTUSD","REQBTC","ETCETH","IOTXUSDT",
+    # "MBLUSDT","WTCBTC","ICXBUSD","GOBTC","CTXCBTC","ELFBTC","NPXSETH","NULSUSDT","COSUSDT","DUSKUSDT","SNMBTC","TROYUSDT","TCTBTC","IOTXBTC",
+    # "EVXBTC","ONTETH","XMRBNB","NASETH","BATBUSD","ZECUSDC","OSTETH","POABTC","DENTUSDT","IOSTETH","COSBTC","SNTETH","TCTUSDT","ADATUSD",
+    # "XLMBNB","NEOBNB","RCNBTC","BNBNGN","ZENETH","BEAMBTC","TRXTUSD","MFTETH","GXSBTC","BATETH","ONTBNB","ZRXETH","IOTXETH","NEOUSDC","WPRBTC",
+    # "VIABTC","QSPBTC","WRXBTC","MITHBNB","ATOMBNB","DUSKBTC","MTHBTC","PHBTUSD","VIBETH","HIVEUSDT","ATOMUSDC","CDTBTC","NCASHETH","QLCBTC",
+    # "NAVBTC","NASBTC","RVNBUSD","GXSETH","QKCETH","CNDBTC","CTSIBUSD","STEEMETH","ICXBNB","WAVESBNB","DASHBNB","BCPTBTC","ZECBNB","HIVEBTC",
+    # "COCOSUSDT","NULSBTC","CMTBTC","LINKTUSD","WINBNB","VIBEBTC","WABIBNB","LSKETH","ENJBUSD","BANDBNB","KEYETH","CELRBNB","BCHABCPAX","RLCETH",
+    # "NKNBTC","TOMOBNB","LTCPAX","DENTETH","WANETH","QSPETH","APPCBTC","RDNBTC","LOOMETH","COCOSBNB","RVNBNB","AIONETH","BQXETH","ETCBNB",
+    # "XRPRUB","XTZBNB","VITEUSDT","NKNUSDT","PIVXETH","ONEBNB","IOTABNB","KAVABNB","BNTETH","FETBNB","TRXPAX","QTUMBUSD","QLCETH",
+    # "FTTBNB","XZCETH","MANAETH","REPETH","CDTETH","BLZETH","ALGOTUSD","ZENBNB","CVCETH","QTUMETH","BLZBNB","VITEBTC","DATAETH","HBARBNB",
+    # "MTLETH","BNBRUB","WTCETH","BTTTUSD","POWRETH","BTTUSDC","BRDETH","STORJETH","MFTBNB","BUSDRUB","KMDETH","BATUSDC","ELFETH",
+    # "IOSTBNB","FTMBNB","MATICBNB","BNTBUSD","WINUSDC","STEEMBNB","PERLBNB","TNBBTC","BATBNB","CMTETH","WTCBNB","TROYBNB",
+    # "XRPPAX","WANBNB","MBLBTC","ZRXBNB","CTSIBNB","BNBPAX","MBLBNB","WRXBNB","BCCBNB","BCHBTC","BCHTUSD"
+
+    ]
+
     
-    selected_coin = st.sidebar.selectbox(
-        "Choose a coin",
-        ("TRXBNB","ETHBTC","TRXBTC","IOSTBTC","BCHBTC","XRPBTC","LTCBTC" )
-    )
-    selected_metrics = st.sidebar.multiselect(
-        'Choose metrics to observe',
-        ["TRXBNB","ETHBTC","TRXBTC","IOSTBTC","BCHBTC","XRPBTC","LTCBTC"])
+    # selected_coin = st.sidebar.selectbox(
+    #     "Choose a coin",
+    #     coin_list
+    # )
+    # selected_metrics = st.sidebar.multiselect(
+    #     'Choose metrics to observe',
+    #     coin_list)
 
-
-
-
-
-
-
-
-    
     # stats_df.index = 
     # stats_df['RSI_14'] = metric_list_dict.values()
     # history_data = controller.find_history("TRXBNB")
@@ -137,17 +178,41 @@ if __name__ == "__main__":
     is_button_pressed = st.sidebar.button('Show stats for various coins')
     if(is_button_pressed):
         metric_list_dict = {}
-        stats_df = pd.DataFrame(columns = ['rsi_14'])
-        for index, coin in enumerate(selected_metrics):
-            controller.historic_data = controller.find_history(coin)
-            controller.historic_data['Open time converted'] = controller.historic_data.index.astype("int64")/1000
-            controller.historic_data['Open time converted'] = controller.historic_data['Open time converted'].apply(lambda x: datetime.fromtimestamp(x))
 
-            controller.prepare_data()
-            controller.preprare_Sdf_data()
-            metric = controller.calculate_metrics('rsi_14')
-            metric_list_dict[coin] = metric.iloc[-1:][0]
-            stats_df = stats_df.append({'rsi_14' : metric.iloc[-1:][0] }, ignore_index=True)
-        stats_df.index = selected_metrics
-        st.dataframe(stats_df.style.applymap(color))
+        columns = ['rsi_7', 'rsi_14', 'wr_6', 'wr_10', 'macd', 'cci', 'cci_20']
+        stats_list = []
+        success_coin_list = []
+
+        for index, coin in enumerate(coin_list):
+            try:
+                controller.historic_data = controller.find_history(coin)
+                controller.historic_data['Open time converted'] = controller.historic_data.index.astype("int64")/1000
+                controller.historic_data['Open time converted'] = controller.historic_data['Open time converted'].apply(lambda x: datetime.fromtimestamp(x))
+
+                controller.prepare_data()
+                controller.preprare_Sdf_data()
+                temp_list = []
+                for col in columns:
+
+                    metric = controller.calculate_metrics(col)
+                    temp_list.append(metric.iloc[-1:][0])
+
+                metric_list_dict[coin] = temp_list
+                stats_list.append(temp_list)
+                success_coin_list.append(coin)
+            except Exception as e:
+                print(e)
+                continue
+        stats_df = pd.DataFrame(columns = columns, data = stats_list)
+        stats_df.index = success_coin_list
+
+        # wr_collist = [x for x in columns if "wr" in x]
+        # rsi_collist = [x for x in columns if "rsi" in x]
+        # for i in wr_collist:
+        #     stats_df[i].style.applymap(color_wr)
+        
+        # for i in rsi_collist:
+        #     stats_df[i].style.applymap(color_rsi)
+
+        st.dataframe(stats_df)
         
