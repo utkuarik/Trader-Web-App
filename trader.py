@@ -96,12 +96,42 @@ class Controller:
     def preprare_Sdf_data(self):
         stockstats_df = Sdf.retype(self.historic_data)
         self.stockstats_df = stockstats_df
+
+    def show_chart_selected_coin(self, selected_coin):
+        self.historic_data = self.find_history(selected_coin)
+        self.historic_data['Open time converted'] = self.historic_data["Open time"].apply(lambda x: int(x)/1000)
+        # st.dataframe(self.historic_data['Open time converted'])
+        self.historic_data['Open time converted'] = self.historic_data['Open time converted'].apply(lambda x: datetime.fromtimestamp(x))
+        # st.dataframe(self.historic_data)
+        self.historic_data = self.historic_data.sort_values('Open time converted', ascending= True)
+        s1 = figure(plot_width=800, plot_height=400,  x_axis_type='datetime', background_fill_color="#fafafa")
+        s1.left[0].formatter.use_scientific = False
+        s1.line(self.historic_data['Open time converted'], self.historic_data['Close'],  color="Black", alpha=1, legend_label = selected_coin)
+        st.bokeh_chart(s1)
+        self.prepare_data()
+        self.preprare_Sdf_data()
+        temp_list = []
+        stats_list = []
+        metric_list_dict = {}
+        for col in columns:
+
+            metric = self.calculate_metrics(col)
+            temp_list.append(metric.iloc[-1:][0])
+
+        metric_list_dict[selected_coin] = temp_list
+        stats_list.append(temp_list)
+        stats_df = pd.DataFrame(columns = columns, data = stats_list)   
+        st.text("Stats for the selected coin " + selected_coin)
+        st.dataframe(stats_df)
+
+        return stats_df
         
 if __name__ == "__main__":
 
     controller = Controller()
 # Enter your api key and secret key here
     client = Client("","")
+    columns = ['rsi_7', 'rsi_14', 'wr_6', 'wr_10', 'macd', 'cci', 'cci_20']
     coin_list = ["BTCUSDT", "ETHUSDT"
     ,"BTCBUSD","ETHBUSD","ETHBTC","LTCUSDT","BUSDUSDT","DOGEUSDT","XRPUSDT","BCCUSDT","BTCEUR",
     "ADAUSDT","USDCUSDT","LINKUSDT","BNBUSDT","BTCUSDC","VENUSDT","LTCBTC","DOGEBTC","THETAUSDT","EOSUSDT","ETHUSDC","XRPBTC",
@@ -145,47 +175,28 @@ if __name__ == "__main__":
     ]
 
     
-    # selected_coin = st.sidebar.selectbox(
-    #     "Choose a coin",
-    #     coin_list
-    # )
-    # selected_metrics = st.sidebar.multiselect(
-    #     'Choose metrics to observe',
-    #     coin_list)
+    selected_coin = st.sidebar.selectbox(
+        "Choose a coin",
+        coin_list
+    )
 
-    # stats_df.index = 
-    # stats_df['RSI_14'] = metric_list_dict.values()
-    # history_data = controller.find_history("TRXBNB")
-    # data = history_data[['Open', 'High', 'Low', 'Close', 'Volume', 'Quote asset volume']]
-    # data.index = history_data['Open time']
-    # for col in data.columns:
-    #     data[col] = data[col].astype(float)
-
-    # stockstats_df = Sdf.retype(data)
-    # stockstats_df['rsi_14']
-
-    
-    # s1 = figure(plot_width=800, plot_height=400,  x_axis_type='datetime', background_fill_color="#fafafa")
-    # s1.left[0].formatter.use_scientific = False
-    # #s1.below[0].formatter.use_scientific = False
+    is_sc_button_pressed = st.sidebar.button('Show the selected coin')
+    if(is_sc_button_pressed):
+        controller.show_chart_selected_coin(selected_coin)
 
 
-    # s1.line(controller.history_data['Open time converted'], controller.history_data['Close'],  color="Black", alpha=1, legend_label = selected_coin)
-
-    # st.bokeh_chart(s1)
-
-    # multi_data = controller.find_history_all(selected_metrics)
     is_button_pressed = st.sidebar.button('Show stats for various coins')
     if(is_button_pressed):
         metric_list_dict = {}
 
-        columns = ['rsi_7', 'rsi_14', 'wr_6', 'wr_10', 'macd', 'cci', 'cci_20']
+
         stats_list = []
         success_coin_list = []
 
         for index, coin in enumerate(coin_list):
             try:
                 controller.historic_data = controller.find_history(coin)
+
                 controller.historic_data['Open time converted'] = controller.historic_data.index.astype("int64")/1000
                 controller.historic_data['Open time converted'] = controller.historic_data['Open time converted'].apply(lambda x: datetime.fromtimestamp(x))
 
@@ -205,6 +216,22 @@ if __name__ == "__main__":
                 continue
         stats_df = pd.DataFrame(columns = columns, data = stats_list)
         stats_df.index = success_coin_list
+        
+
+        ## Find investable coins
+        rsi_collist = [x for x in columns if "rsi" in x]
+        wr_collist = [x for x in columns if "wr" in x]
+
+
+        investable_coins_df = stats_df
+        for col in rsi_collist:
+            investable_coins_df = investable_coins_df.loc[stats_df[col] < 30]
+
+
+        for col in wr_collist:
+            investable_coins_df = investable_coins_df.loc[stats_df[col] > 80]
+        
+
 
         # wr_collist = [x for x in columns if "wr" in x]
         # rsi_collist = [x for x in columns if "rsi" in x]
@@ -214,5 +241,8 @@ if __name__ == "__main__":
         # for i in rsi_collist:
         #     stats_df[i].style.applymap(color_rsi)
 
+        st.text("Investable Coins regarding to indicators")
+        st.dataframe(investable_coins_df)
         st.dataframe(stats_df)
+
         

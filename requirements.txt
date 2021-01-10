@@ -2,7 +2,7 @@ pandas==1.1.5
 pytz==2020.5
 numpy==1.19.4
 stockstats==0.3.2
-streamlit==0.73.1
+streamlit==0.71.0
 binance==0.3
 bokeh==2.2.3
 matplotlib==3.3.3
